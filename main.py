@@ -6,14 +6,12 @@ from dotenv import load_dotenv
 
 def main():
     load_dotenv()
+    verbose = True if "--verbose" in sys.argv else False
     args = [] 
     for arg in sys.argv[1:]:
         if not arg.startswith("--"):
             args.append(arg)
-    
-    verbose = True if "--verbose" in sys.argv else False
-    
-    
+
     if not args:
         print("DevDevBot Code Assistant:")    
         print('\nUsage: python main.py "your prompt here"')
