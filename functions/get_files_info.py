@@ -23,6 +23,7 @@ def get_files_info(working_directory, directory="."): # type: ignore
         print('Its a directory')
         # Check if the directory is outside of the sandbox (not safe)
 
+get_files_info("calculator", "."):
 test = get_files_info("/functions","./etc")
 #print( is_safe = (common == os.path.abspath(working_directory)))
 
