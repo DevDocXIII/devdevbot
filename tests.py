@@ -48,7 +48,7 @@ def main():
 
     # 1. Current directory ('.')
     out1 = get_files_info("calculator", ".")
-    if out1.startswith("Error:"):
+    if out1.startswith("Error:l"):
         _print_error("Result for current directory:", out1)
     else:
         _print_entries("Result for current directory:", out1, sandbox)
