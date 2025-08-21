@@ -41,6 +41,20 @@ def get_files_info(working_directory, directory="."):
         return f'{directory} is empty.'
     return '\n'.join(entries)
 
+def get_file_content(working_directory, file_path):
+       # 1. Make the sandbox absolute once
+    sandbox = os.path.abspath(working_directory)
+
+    # 2. Resolve the target directory relative to the sandbox
+    full_path = os.path.abspath(path.join(sandbox, file_path))
+
+    # 3. Boundary check – everything must be inside the sandbox
+    if os.path.commonpath([sandbox, full_path]) != sandbox:
+        return (
+            f'Error: Cannot list "{file_path}" as it is outside the permitted '
+            'working directory'
+        )
+    f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'
 
 # Example call (adjust the path to something that exists on your machine)
 #print(get_files_info("./", "./test"))
