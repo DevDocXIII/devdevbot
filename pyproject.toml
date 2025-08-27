@@ -1,7 +1,7 @@
 [project]
 name = "devdevbot"
 version = "0.1.0"
-description = "Add your description here"
+description = "DevDocBot AI Agent .001 built in lovely python"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
