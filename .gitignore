@@ -11,3 +11,7 @@ wheels/
 
 #environment
 .env
+
+#other stuff
+*.yaml
+*.yml
