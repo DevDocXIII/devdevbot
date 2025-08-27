@@ -12,6 +12,3 @@ wheels/
 #environment
 .env
 .continue
-#other stuff
-*.yaml
-*.yml
