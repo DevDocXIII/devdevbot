@@ -55,6 +55,5 @@ def get_file_content(working_directory, file_path):
             'working directory'
         )
     f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'
-
 # Example call (adjust the path to something that exists on your machine)
 #print(get_files_info("./", "./test"))
