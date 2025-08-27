@@ -14,4 +14,4 @@ wheels/
 .continue
 #other stuff
 *.yaml
-*.yml.continue
+*.yml
