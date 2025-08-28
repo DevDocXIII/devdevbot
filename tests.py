@@ -1,25 +1,12 @@
 # tests.py
 # -------------  project_root/tests.py -------------
-# Import the function we just implemented
-from functions.get_files_info import get_files_info
+from functions.get_files_info import get_file_content, get_files_info
 def main():
-    # 1. Current directory ('.')
-    result  = get_files_info("calculator", ".")
-    print("\nResult for current directory:")
-    print(result)
-    # 2. pkg directory
-    print("\nResult for 'pkg' directory:")
-    result = get_files_info("calculator", "pkg")
-    print(result)
-    # 3. /bin – should trigger an error
-    print("\nResult for '/bin' directory:")
-    result = get_files_info("calculator", "/bin")
-    print(result)
-    # 4. ../ – also an error
-    print("\nResult for '../' directory:")
-    result  = get_files_info("calculator", "../")
-    print(result)
-
+    #print(get_file_content("calculator", "lorem.txt"))
+    print(get_file_content("calculator", "main.py"))
+    print(get_file_content("calculator", "pkg/calculator.py"))
+    print(get_file_content("calculator", "/bin/cat"))
+    print(get_file_content("calculator", "pkg/does_not_exist.py"))
 
 if __name__ == "__main__":
     main()
