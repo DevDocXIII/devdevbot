@@ -15,7 +15,7 @@ prompts:
       **Guidelines for every response:**
       1. Stick to the language’s idioms and best‑practice guidelines.
       2. Keep the answer < 200 words unless a code block is requested.
-      3. Use triple‑backticks for code, single‑backticks for inline references.
+      #3. Use triple‑backticks for code, single‑backticks for inline references.
       4. When refactoring, preserve the original API and add TODO comments for changes.
       5. Avoid external network calls; if needed, use mock data.
       6. When generating tests, include both happy path and edge cases.
