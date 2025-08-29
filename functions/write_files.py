@@ -1,30 +1,79 @@
-# write_files.py in functions folder
+# functions/write_files.py
+"""
+Utility for writing a string to a file within a sandboxed directory.
+
+The helper guarantees that the write target never escapes the supplied
+``working_directory``.  It creates parent directories on demand and
+returns a descriptive success or error message.
+
+Usage
+-----
+>>> write_file("/tmp/sandbox", "sub/hello.txt", "world")
+'SUCCESS: wrote to "sub/hello.txt" (5 characters written)'
+
+If the target is outside the sandbox, the function returns an error string.
+"""
+
 import os
-from os import path
+from pathlib import Path
+from typing import Tuple
 
-def write_file(working_directory, file_path, content):
+def write_file(
+    working_directory: str, file_path: str, content: str
+) -> str:
+    """
+    Write ``content`` to ``file_path`` relative to ``working_directory``.
 
-    sandbox = os.path.abspath(working_directory)
-    full_path = os.path.abspath(path.join(sandbox, file_path))
+    Parameters
+    ----------
+    working_directory : str
+        Base directory that defines the sandbox.
+    file_path : str
+        Target file path (relative to ``working_directory``).
+    content : str
+        Data to be written.
 
-    if os.path.commonpath([sandbox, full_path]) != sandbox:
+    Returns
+    -------
+    str
+        A message starting with ``SUCCESS:`` on success or ``Error:`` on
+        failure.  The message includes the number of characters written.
+
+    Notes
+    -----
+    * The function automatically creates missing parent directories.
+    * All paths are resolved with :class:`pathlib.Path` to avoid issues
+      with ``..`` traversal.
+    * No exceptions are raised – the caller should inspect the return
+      string for errors.
+    """
+    sandbox = Path(working_directory).resolve()
+    full_path = (sandbox / file_path).resolve()
+
+    # Sandbox boundary check
+    try:
+        full_path.relative_to(sandbox)
+    except ValueError:
         return (
-            f'Error: Cannot write to "{file_path}" as it is outside the permitted '
-            'working directory'
+            f'Error: Cannot write to "{file_path}" as it is outside the '
+            'permitted working directory'
         )
 
-    parent_dir = os.path.dirname(full_path)
-    if not os.path.isdir(parent_dir):
-        try:
-            os.makedirs(parent_dir,0o777,True)
-        except Exception as e:
-             raise Exception(f"Error: {str(e)}")
-             #return f'Error: "{file_path}" is not a directory'
+    # Ensure parent directory exists
+    parent_dir = full_path.parent
     try:
-        with open(full_path, 'w') as file:
-            file.write(content)
-    except Exception as e:
+        parent_dir.mkdir(parents=True, mode=0o777, exist_ok=True)
+    except OSError as e:
+        return f'Error creating directory "{parent_dir}": {e}'
+
+    # Write the file
+    try:
+        with full_path.open('w', encoding='utf-8') as fp:
+            fp.write(content)
+    except OSError as e:
         return f'Error writing file "{full_path}": {e}'
-    
-    return f'Successfully wrote to "{file_path}" ({len(content)} characters written)'
    
+    return (
+        f'SUCCESS: wrote to "{file_path}" '
+        f'({len(content)} characters written)'
+    )
