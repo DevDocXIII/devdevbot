@@ -1,4 +1,8 @@
-# -*- coding: utf-8 -*-
+__all__ = ["get_files_info", "get_file_content"]
+
+import os
+from .config import MAX_CHARS
+
 """
 Module: get_files_info
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -10,68 +14,65 @@ The module exposes two public helpers:
 - :func:`get_file_content` – read the first *MAX_CHARS* bytes of a file.
 
 Both helpers perform a sandbox boundary check to ensure that the requested path
-stays inside the supplied ``working_directory``.  This is useful when the code
+stays inside the supplied ``working_directory``. This is useful when the code
 is executed in a controlled environment (e.g., a sandboxed CI job or a
 restricted CLI tool).
 """
-
-import os
-from .config import MAX_CHARS
-
 
 def get_files_info(
     working_directory: str,
     directory: str = "."
 ) -> str:
     """
-    Return a human-readable listing of files in ``directory``.
-
+    Return a human‑readable listing of files in ``directory``.
     Parameters
     ----------
     working_directory : str
-        Base directory that defines the sandbox.  All relative paths are
+        Base directory that defines the sandbox. All relative paths are
         resolved against this value.
     directory : str, optional
-        Relative path from ``working_directory`` to list.  Defaults to the
+        Relative path from ``working_directory`` to list. Defaults to the
         current directory.
 
     Returns
     -------
     str
         A string that either contains:
-
         * An error message if the target is outside the sandbox or is not a
           directory.
         * A list of ``- <name> file_size=(<size>) bytes,is_dir=<bool>``
           entries.
-        * ``"<directory> is empty."`` when no non-hidden files are present.
+        * ``"<directory> is empty."`` when no non‑hidden files are present.
 
     Notes
     -----
     * Hidden files (names starting with a dot) are ignored.
-    * The function performs a commonpath check to prevent directory traversal.
+    * The function performs a ``commonpath`` check to prevent directory traversal.
     """
     sandbox = os.path.realpath(working_directory)
     full_path = os.path.realpath(os.path.join(sandbox, directory))
-    if not os.path.commonprefix([sandbox, full_path]) == sandbox:
-        return f'Error: Cannot read "{directory}" outside the working directory.'
+    if os.path.commonpath([sandbox, full_path]) != sandbox:
+        return (
+            f'Error: Cannot read "{directory}" as it is outside the '
+            "permitted working directory"
+        )
     if not os.path.isdir(full_path):
         return f'Error: "{directory}" is not a directory'
 
     files_info = []
     for name in os.listdir(full_path):
+        if name.startswith("."):
+            continue
         filepath = os.path.join(full_path, name)
         is_dir = os.path.isdir(filepath)
         size = os.path.getsize(filepath)
-        if name.startswith('.'):
-            continue
         files_info.append(
             f"- {name} file_size=({size}) bytes,is_dir={is_dir}"
         )
 
     if not files_info:
         return f'{directory} is empty.'
-    return '\n'.join(files_info)
+    return "\n".join(files_info)
 
 
 def get_file_content(
@@ -80,7 +81,6 @@ def get_file_content(
 ) -> str:
     """
     Read up to ``MAX_CHARS`` bytes from a file and return its content.
-
     Parameters
     ----------
     working_directory : str
@@ -92,7 +92,7 @@ def get_file_content(
     -------
     str
         The file content truncated to ``MAX_CHARS`` characters if the file is
-        larger.  If the file is smaller, the full content is returned.
+        larger. If the file is smaller, the full content is returned.
         In error cases the string will start with ``"Error:"``.
 
     Notes
@@ -103,20 +103,21 @@ def get_file_content(
     """
     sandbox = os.path.realpath(working_directory)
     full_path = os.path.realpath(os.path.join(sandbox, file_path))
-    if not os.path.commonprefix([sandbox, full_path]) == sandbox:
-        return f'Error: Cannot read "{file_path}" outside the working directory.'
+    if os.path.commonpath([sandbox, full_path]) != sandbox:
+        return (
+            f'Error: Cannot read "{file_path}" as it is outside the '
+            "permitted working directory"
+        )
     if not os.path.isfile(full_path):
         return f'Error: File not found or is not a regular file: "{file_path}"'
 
     try:
-        with open(full_path, "r") as f:
+        with open(full_path, encoding="utf-8", errors="replace") as f:
             file_content_string = f.read(MAX_CHARS)
-            if os.path.getsize(full_path) >= MAX_CHARS:   
-                file_content_string += (
-                    f"[...File '{file_path}' truncated at {MAX_CHARS} characters]"
-                )
-            return file_content_string
+        if os.path.getsize(full_path) > MAX_CHARS:
+            file_content_string += (
+                f"[...File '{file_path}' truncated at {MAX_CHARS} characters]"
+            )
+        return file_content_string
     except Exception as e:
         return f'Error reading file "{file_path}": {e}'
-
-
