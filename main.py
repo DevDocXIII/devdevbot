@@ -17,7 +17,6 @@ def main():
         print('\nUsage: python main.py "your prompt here"')
         print('Example: python main.py "How do I build a calculator app?"\n')
         sys.exit(1)
-    #print(f"argv={sys.argv[1]}")    
     
     api_key = os.getenv("GEMINI_API_KEY")
     client = genai.Client(api_key = api_key)
