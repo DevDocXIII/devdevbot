@@ -2,16 +2,9 @@
 """
 Utility for writing a string to a file within a sandboxed directory.
 
-The helper guarantees that the write target never escapes the supplied
-``working_directory``.  It creates parent directories on demand and
-returns a descriptive success or error message.
-
-Usage
------
->>> write_file("/tmp/sandbox", "sub/hello.txt", "world")
-'SUCCESS: wrote to "sub/hello.txt" (5 characters written)'
-
-If the target is outside the sandbox, the function returns an error string.
+Writes a string to `file_path` relative to `working_directory`,
+ensuring the target cannot escape the sandbox.  Returns a short
+SUCCESS/ERROR message with the character count.
 """
 
 import os
@@ -38,19 +31,11 @@ def write_file(
     str
         A message starting with ``SUCCESS:`` on success or ``Error:`` on
         failure.  The message includes the number of characters written.
-
-    Notes
-    -----
-    * The function automatically creates missing parent directories.
-    * All paths are resolved with :class:`pathlib.Path` to avoid issues
-      with ``..`` traversal.
-    * No exceptions are raised – the caller should inspect the return
-      string for errors.
     """
     sandbox = Path(working_directory).resolve()
     full_path = (sandbox / file_path).resolve()
 
-    # Sandbox boundary check
+    # Verify the file stays inside the sandbox
     try:
         full_path.relative_to(sandbox)
     except ValueError:
@@ -59,7 +44,7 @@ def write_file(
             'permitted working directory'
         )
 
-    # Ensure parent directory exists
+    # Ensure the destination directory exists
     parent_dir = full_path.parent
     try:
         parent_dir.mkdir(parents=True, mode=0o777, exist_ok=True)
@@ -78,14 +63,10 @@ def write_file(
         f'({len(content)} characters written)'
     )
 
-def add_two_number(a, b):
-    return a + b
-def subtract_number(a, b):
-    return a - b
-def square_number(a):
-    return a ** 2
-
 def main():
-    result = write_file("calculator", "lorem.txt", "wait, this isn't lorem ipsum")  
-def add_two_numbers_and_divide(a, b, c):
-    return (a + b) / c
+    result = write_file("calculator", "lorem.txt",
+                       "wait, this isn't lorem ipsum")
+    print(result)  
+    
+if __name__ == "__main__":
+    main()
