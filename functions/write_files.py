@@ -77,3 +77,15 @@ def write_file(
         f'SUCCESS: wrote to "{file_path}" '
         f'({len(content)} characters written)'
     )
+
+def add_two_number(a, b):
+    return a + b
+def subtract_number(a, b):
+    return a - b
+def square_number(a):
+    return a ** 2
+
+def main():
+    result = write_file("calculator", "lorem.txt", "wait, this isn't lorem ipsum")  
+def add_two_numbers_and_divide(a, b, c):
+    return (a + b) / c
