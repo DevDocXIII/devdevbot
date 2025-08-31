@@ -1,11 +1,4 @@
 # functions/write_files.py
-"""
-Utility for writing a string to a file within a sandboxed directory.
-
-Writes a string to `file_path` relative to `working_directory`,
-ensuring the target cannot escape the sandbox.  Returns a short
-SUCCESS/ERROR message with the character count.
-"""
 import os
 from pathlib import Path
 from google.genai import types
@@ -15,24 +8,7 @@ def write_file(
     content: str,
     working_directory: str = os.getcwd()
 ) -> str:
-    """
-    Write ``content`` to ``file_path`` relative to ``working_directory``.
 
-    Parameters
-    ----------
-    working_directory : str
-        Base directory that defines the sandbox.
-    file_path : str
-        Target file path (relative to ``working_directory``).
-    content : str
-        Data to be written.
-
-    Returns
-    -------
-    str
-        A message starting with ``SUCCESS:`` on success or ``Error:`` on
-        failure.  The message includes the number of characters written.
-    """
     sandbox = Path(working_directory).resolve()
     full_path = (sandbox / file_path).resolve()
 

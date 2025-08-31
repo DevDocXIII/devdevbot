@@ -5,6 +5,7 @@ import json
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
+from functions.get_file_content import get_file_content
 from functions.utils import normalize_args
 
 # ──────────────────────────────────────
@@ -12,9 +13,9 @@ from functions.utils import normalize_args
 # ──────────────────────────────────────
 from functions.config import SYSTEM_PROMPT
 from functions.get_files_info import schema_get_files_info, get_files_info
-from functions.get_files_info import schema_get_file_content, get_file_content
+from functions.get_file_content import schema_get_file_content, get_file_content
 from functions.write_files import schema_write_file, write_file
-from functions.run_python import schema_run_python_file, run_python_file
+from functions.run_python_file import schema_run_python_file, run_python_file
 #from functions.execute_python import schema_execute_python, execute_python
 # ──────────────────────────────────────
 #  Gemini function tool
@@ -80,9 +81,6 @@ def main():
     ]
 
     generate_content(client, messages, user_prompt, verbose)
-
-# python
-# python
 def generate_content(client, messages, user_prompt, verbose):
     response = client.models.generate_content(
         model="gemini-2.0-flash-001",
@@ -131,7 +129,7 @@ def generate_content(client, messages, user_prompt, verbose):
             result= write_file(**args)        # <-- NEW
             print("Function result:")
             print(result)
-        elif function_part.name == "run_python":
+        elif function_part.name == "run_python_file":
             result = run_python_file(**args)  # <-- NEW
             print("Function result:")
             print(result)
