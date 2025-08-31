@@ -67,6 +67,7 @@ def main():
     generate_content(client, messages, user_prompt, verbose)
 
 # python
+# python
 def generate_content(client, messages, user_prompt, verbose):
     response = client.models.generate_content(
         model="gemini-2.0-flash-001",
@@ -84,7 +85,13 @@ def generate_content(client, messages, user_prompt, verbose):
         response.usage_metadata.candidates_token_count,
     )
 
+    if not response.candidates:
+        print("Response:")
+        print(response.text or "")
+        return
+
     candidate = response.candidates[0]
+
 
     # Look for a function call first
     function_part = None
@@ -99,13 +106,8 @@ def generate_content(client, messages, user_prompt, verbose):
 
         if function_part.name == "get_files_info":
             result = get_files_info(**args)
-            # Print raw-ish so tests can see expected substrings
-            if isinstance(result, (dict, list)):
-                print("Function result:")
-                print(result)
-            else:
-                print("Function result:")
-                print(result)
+            print("Function result:")
+            print(result)
     else:
         # Only print text when there’s no function call
         print("Response:")
