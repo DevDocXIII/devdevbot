@@ -19,6 +19,14 @@ from functions.run_python import schema_run_python_file, run_python_file
 # ──────────────────────────────────────
 #  Gemini function tool
 # ──────────────────────────────────────
+# AVAILABLE_FUNCTIONS = {
+#     "get_files_info": get_files_info,
+#     "get_file_content": get_file_content,
+#     "run_python_file": run_python_file,
+#     "write_file": write_file,
+# }
+
+
 available_functions = types.Tool(
     function_declarations=[schema_get_files_info, 
                         schema_get_file_content,
@@ -120,11 +128,11 @@ def generate_content(client, messages, user_prompt, verbose):
             print("Function result:")
             print(result)
         elif function_part.name == "write_file":
-            result = write_file(**args)        # <-- NEW
+            result= write_file(**args)        # <-- NEW
             print("Function result:")
             print(result)
         elif function_part.name == "run_python":
-            result = run_python_file(**args):   # <-- NEW
+            result = run_python_file(**args)  # <-- NEW
             print("Function result:")
             print(result)
     else:

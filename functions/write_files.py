@@ -11,7 +11,9 @@ from pathlib import Path
 from google.genai import types
 
 def write_file(
-    working_directory: str, file_path: str, content: str
+    file_path: str,                          # <-- no default, comes first
+    content: str,
+    working_directory: str = os.getcwd()
 ) -> str:
     """
     Write ``content`` to ``file_path`` relative to ``working_directory``.
