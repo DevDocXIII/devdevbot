@@ -7,24 +7,6 @@ from google import genai
 from google.genai import types
 from functions.utils import normalize_args
 
-# def parse_function_args(arg: str | dict | None) -> dict:
-#     """
-#     Convert Gemini’s function‑call arguments into a Python dict.
-
-#     * If `arg` is already a dict, it's returned unchanged.
-#     * If `arg` is a JSON string, it's parsed.
-#     * If `arg` is `None` or an empty string, an empty dict is returned.
-#     """
-#     if isinstance(arg, dict):
-#         return arg
-#     if not arg:  # covers None and ""
-#         return {}
-#     try:
-#         return json.loads(arg)
-#     except json.JSONDecodeError:
-#         # If the string is malformed, treat it as no arguments
-#         return {}
-
 # ──────────────────────────────────────
 #  Custom imports
 # ──────────────────────────────────────
