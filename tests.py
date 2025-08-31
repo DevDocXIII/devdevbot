@@ -4,8 +4,6 @@
 
 # Imports that were already present in the original file
 from functions.get_files_info import get_file_content, get_files_info
-from functions.write_files import write_file
-# The helper being tested
 from functions.run_python import run_python_file
 
 def run_tests():
@@ -18,7 +16,8 @@ def run_tests():
     print(result)
 
     # Test running this test file itself
-    run_python_file("calculator", "tests.py")
+    result = run_python_file("calculator", "tests.py")
+    print(result)
 
     # Should error because target file is outside the working directory
     result = run_python_file("calculator", "../main.py")
