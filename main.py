@@ -14,27 +14,16 @@ from functions.utils import normalize_args
 from functions.config import SYSTEM_PROMPT
 from functions.get_files_info import schema_get_files_info, get_files_info
 from functions.get_file_content import schema_get_file_content, get_file_content
-from functions.write_files import schema_write_file, write_file
-from functions.run_python_file import schema_run_python_file, run_python_file
+from functions.write_file_content import schema_write_file, write_file
+from functions.run_python import schema_run_python_file, run_python_file
 #from functions.execute_python import schema_execute_python, execute_python
-# ──────────────────────────────────────
-#  Gemini function tool
-# ──────────────────────────────────────
-# AVAILABLE_FUNCTIONS = {
-#     "get_files_info": get_files_info,
-#     "get_file_content": get_file_content,
-#     "run_python_file": run_python_file,
-#     "write_file": write_file,
-# }
 
-
-available_functions = types.Tool(
-    function_declarations=[schema_get_files_info, 
-                        schema_get_file_content,
-                        schema_write_file,        # NEW
-                        schema_run_python_file,       # NEW
-    ]
-)
+available_functions = types.Tool(function_declarations=[
+schema_get_files_info,
+schema_get_file_content,
+schema_run_python_file,
+schema_write_file,
+])
 
 # ──────────────────────────────────────
 #  Helper functions
@@ -116,6 +105,9 @@ def generate_content(client, messages, user_prompt, verbose):
     if function_part:
         args = normalize_args(function_part.args)
         print(f"Calling function: {function_part.name}({args})")
+
+        
+
 
         if function_part.name == "get_files_info":
             result = get_files_info(**args)
