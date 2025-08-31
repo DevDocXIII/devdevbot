@@ -31,10 +31,12 @@ def get_files_info(
         return f'{directory} is empty.'
     return "\n".join(files_info)
 
+# functions/get_files_info.py
 def get_file_content(
-    working_directory: str,
-    file_path: str
+    file_path: str,                          # <-- no default, comes first
+    working_directory: str = os.getcwd()     # <-- defaulted, comes after
 ) -> str:
+    """Return the content of a file."""
     sandbox = os.path.realpath(working_directory)
     full_path = os.path.realpath(os.path.join(sandbox, file_path))
     if os.path.commonpath([sandbox, full_path]) != sandbox:
@@ -68,4 +70,32 @@ schema_get_files_info = types.FunctionDeclaration(
             ),
         },
     ),
+)
+schema_get_file_content = types.FunctionDeclaration(
+    name="get_file_content",
+    description="Read the contents of the file requested in the specified directory constrained to the working directory.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="The path to the file, relative to the working directory. If not provided, lists files in the working directory itself.",
+            ),
+         },
+       required=["file_path"],
+       )
+)
+schema_get_file_content = types.FunctionDeclaration(
+    name="get_file_content",
+    description="Read the contents of the file requested in the specified directory constrained to the working directory.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="The path to the file, relative to the working directory. If not provided, lists files in the working directory itself.",
+            ),
+         },
+       required=["file_path"],
+       )
 )

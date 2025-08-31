@@ -6,10 +6,9 @@ Writes a string to `file_path` relative to `working_directory`,
 ensuring the target cannot escape the sandbox.  Returns a short
 SUCCESS/ERROR message with the character count.
 """
-
 import os
 from pathlib import Path
-#from typing import Tuple
+from google.genai import types
 
 def write_file(
     working_directory: str, file_path: str, content: str
@@ -62,6 +61,30 @@ def write_file(
         f'SUCCESS: wrote to "{file_path}" '
         f'({len(content)} characters written)'
     )
+
+
+# ---- Schema for Gemini ---------------------------------------
+schema_write_file = types.FunctionDeclaration(
+    name="write_file",
+    description=(
+        "Create or overwrite a file relative to the working directory. "
+        "Creates any missing directories automatically."
+    ),
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="Relative path of the file to write.",
+            ),
+            "content": types.Schema(
+                type=types.Type.STRING,
+                description="The text that will be written to the file.",
+            ),
+        },
+        required=["file_path", "content"],
+    ),
+)
 
 def main():
     result = write_file("calculator", "lorem.txt",
