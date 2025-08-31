@@ -36,7 +36,7 @@ def get_file_content(
     working_directory: str,
     file_path: str
 ) -> str:
-    sandbox = os.path.realpath(working_directory)
+    sandabsbox = os.path.realpath(working_directory)
     full_path = os.path.realpath(os.path.join(sandbox, file_path))
     if os.path.commonpath([sandbox, full_path]) != sandbox:
         return (
