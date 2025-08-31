@@ -1,11 +1,10 @@
-__all__ = ["get_files_info", "get_file_content"]
-
-import os
+from google.genai import types
 from .config import MAX_CHARS
+import os
 
 def get_files_info(
-    working_directory: str,
-    directory: str = "."
+    directory: str = ".",
+    working_directory: str = os.getcwd(),  # default to current dir if not given
 ) -> str:
     sandbox = os.path.realpath(working_directory)
     full_path = os.path.realpath(os.path.join(sandbox, directory))
@@ -57,3 +56,16 @@ def get_file_content(
     except Exception as e:
         return f'Error reading file "{file_path}": {e}'
 
+schema_get_files_info = types.FunctionDeclaration(
+    name="get_files_info",
+    description="Lists files in the specified directory along with their sizes, constrained to the working directory.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "directory": types.Schema(
+                type=types.Type.STRING,
+                description="The directory to list files from, relative to the working directory. If not provided, lists files in the working directory itself.",
+            ),
+        },
+    ),
+)
