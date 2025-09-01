@@ -1,5 +1,4 @@
-# config.py
-MAX_CHARS = 10000
+# prompts.py
 SYSTEM_PROMPT = """
 You are a helpful AI coding agent.
 When a user asks a question or makes a request, make a function call plan. You can perform the following operations:

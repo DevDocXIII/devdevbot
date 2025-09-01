@@ -1,5 +1,6 @@
+# functions/get_file_content.py
 from google.genai import types
-from functions.config import MAX_CHARS
+from config import MAX_CHARS
 import os
 
 def get_file_content(
@@ -18,7 +19,7 @@ def get_file_content(
         return f'Error: File not found or is not a regular file: "{file_path}"'
 
     try:
-        with open(full_path,"r") as f:
+        with open(full_path,"r", encoding="utf-8") as f:
             file_content_string = f.read(MAX_CHARS)
         if os.path.getsize(full_path) > MAX_CHARS:
             file_content_string += (
@@ -27,7 +28,6 @@ def get_file_content(
         return file_content_string
     except Exception as e:
         return f'Error reading file "{file_path}": {e}'
-
 schema_get_file_content = types.FunctionDeclaration(
     name="get_file_content",
     description="Read the contents of the file requested in the specified directory constrained to the working directory.",
@@ -36,9 +36,9 @@ schema_get_file_content = types.FunctionDeclaration(
         properties={
             "file_path": types.Schema(
                 type=types.Type.STRING,
-                description="The path to the file, relative to the working directory. If not provided, lists files in the working directory itself.",
+                description="The path to the file, relative to the working directory.",
             ),
-         },
-       required=["file_path"],
-       )
+        },
+        required=["file_path"],
+    ),
 )

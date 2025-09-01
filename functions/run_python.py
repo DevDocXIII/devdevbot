@@ -1,11 +1,13 @@
+# functions/run_python.py
 import os
+import sys
 from os import path
 import subprocess
 from google.genai import types
 
 def run_python_file(
+    working_directory,
     file_path, 
-    working_directory: str = os.getcwd(),
     args=None):
 
     if args is None:
@@ -32,7 +34,7 @@ def run_python_file(
         return f'Error: File "{file_path}" is not a Python file.'
 
     # ----- 4. Build the command -----
-    cmd = ["python3", full_path] + args
+    cmd = [sys.executable, full_path] + args
 
     try:
         result = subprocess.run(
@@ -43,7 +45,7 @@ def run_python_file(
             timeout=30,
             check=False,  # we will handle non‑zero exit codes ourselves
         )
-# Format the output
+
         output_parts = []
 
         if result.stdout:
@@ -77,7 +79,7 @@ schema_run_python_file = types.FunctionDeclaration(
             "args": types.Schema(
                 type=types.Type.ARRAY,
                 items=types.Schema(type=types.Type.STRING),
-                description="Optional list of command‑line arguments.",
+                description="Optional list of command-line arguments.",
             ),
         },
         required=["file_path"],
