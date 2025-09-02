@@ -2,7 +2,11 @@
 from pathlib import Path
 from google.genai import types
 
-def write_file(working_directory: str, file_path: str, content: str) -> str:
+def write_file(
+    working_directory: str,
+    file_path: str,
+    content: str) -> str:
+    
     sandbox = Path(working_directory).resolve()
     full_path = (sandbox / file_path).resolve()
 
@@ -24,6 +28,7 @@ def write_file(working_directory: str, file_path: str, content: str) -> str:
         return f'Error writing file "{full_path}": {e}'
 
     return f'SUCCESS: wrote to "{file_path}" ({len(content)} characters written)'
+
 schema_write_file = types.FunctionDeclaration(
     name="write_file",
     description=(

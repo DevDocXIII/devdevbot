@@ -38,7 +38,7 @@ def run_python_file(
 
     try:
         result = subprocess.run(
-            cmd,
+            args=cmd,
             cwd=abs_work_dir,
             capture_output=True,
             text=True,

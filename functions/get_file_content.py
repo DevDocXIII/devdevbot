@@ -4,8 +4,8 @@ from config import MAX_CHARS
 import os
 
 def get_file_content(
-    file_path: str,                          # <-- no default, comes first
-    working_directory: str = os.getcwd()     # <-- defaulted, comes after
+    file_path: str,       
+    working_directory: str
 ) -> str:
     """Return the content of a file."""
     sandbox = os.path.realpath(working_directory)
