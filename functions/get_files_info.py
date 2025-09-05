@@ -24,10 +24,14 @@ def get_files_info(
             if filename.startswith("."):
                 continue
             filepath = os.path.join(target_dir, filename)
-            file_size = 0
-            is_dir = os.path.isdir(filepath)
-            file_size= size = os.path.getsize(filepath)
-            files_info.append(f"- {filename} file_size=({size}) bytes, is_dir={is_dir}")
+            #file_size = 0 #do not think this is necessary
+            #is_dir = os.path.isdir(filepath) #not used and superceded by if not os.path.isfile
+            #if is_dir: continue # skip directories with continue
+            if not os.path.isfile(filepath):
+                continue # skip non-files
+            size = os.path.getsize(filepath)
+            #files_info.append(f"- file_name={filename} file_size=({size}) bytes, is_dir={is_dir}")
+            files_info.append(f"- file_name={filename} file_size=({size}) bytes")
         return "\n".join(files_info)
     except Exception as e: 
         return f"Error listing files: {e}"

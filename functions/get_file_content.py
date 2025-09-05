@@ -28,6 +28,8 @@ def get_file_content(
         return file_content_string
     except Exception as e:
         return f'Error reading file "{file_path}": {e}'
+
+
 schema_get_file_content = types.FunctionDeclaration(
     name="get_file_content",
     description="Read the contents of the file requested in the specified directory constrained to the working directory.",

@@ -1,12 +1,12 @@
 # main.py
 import os
 import sys
-from annotated_types import T
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from call_function import call_function, available_functions
 from prompts import SYSTEM_PROMPT
+from config import MAX_ITERATIONS   
 
 def load_api_key():
     key = os.getenv("GEMINI_API_KEY")
@@ -35,6 +35,7 @@ def main():
     messages = [
         types.Content(role="user", parts=[types.Part(text=user_prompt)])
     ]
+    # Generate content using the client and messages
     generate_content(client, messages, user_prompt, verbose)
 
 def generate_content(client, messages, user_prompt, verbose):
@@ -83,10 +84,11 @@ def generate_content(client, messages, user_prompt, verbose):
 
         result_dict = function_call_result.parts[0].function_response.response or {}
         output_text = result_dict.get("result", "") or result_dict.get("error", "")
+        
         if output_text:
             print(output_text)
         if verbose:
-            print(f"-> {function_call_result.parts[0].function_response}")
+            print(f"-> {function_call_result.parts[0].function_response.response}")
     else:
         # No function call: just print the model’s text if any
         if response.text:

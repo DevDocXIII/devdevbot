@@ -1,2 +1,4 @@
 # config.py
 MAX_CHARS = 10000
+MAX_ITERATIONS = 20
+WORKING_DIRECTORY = "./calculator"

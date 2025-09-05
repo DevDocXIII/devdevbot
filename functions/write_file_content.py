@@ -31,16 +31,13 @@ def write_file(
 
 schema_write_file = types.FunctionDeclaration(
     name="write_file",
-    description=(
-        "Create or overwrite a file relative to the working directory. "
-        "Creates any missing directories automatically."
-    ),
+    description="Writes content to a file within the working directory. Creates the file if it doesn't exist.",
     parameters=types.Schema(
         type=types.Type.OBJECT,
         properties={
             "file_path": types.Schema(
                 type=types.Type.STRING,
-                description="Relative path of the file to write.",
+                description="Path to the file to write relative to the working directory.",
             ),
             "content": types.Schema(
                 type=types.Type.STRING,
