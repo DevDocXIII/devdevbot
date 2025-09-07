@@ -126,6 +126,9 @@ def generate_content(client, messages, user_prompt, verbose):
     #tag on function results under an assistant role 
     if function_call_result:
         messages.append(function_call_result)
+        return True
+
+
     else: # if no function call all done
         print('Done: Here you go, hope I did good!')
         print(response.text)
