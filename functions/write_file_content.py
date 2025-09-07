@@ -10,6 +10,20 @@ def write_file(
     sandbox = Path(working_directory).resolve()
     full_path = (sandbox / file_path).resolve()
 
+
+    # ----‑backup logic‑----
+    if full_path.exists():
+        backup_path = full_path.with_suffix(full_path.suffix + ".bak")
+        # make sure we don’t overwrite an existing backup
+        counter = 1
+        while backup_path.exists():
+            backup_path = full_path.with_suffix(
+                f"{full_path.suffix}.bak.{counter}"
+            )
+            counter += 1
+        full_path.rename(backup_path)
+        print(f"Backup created: {backup_path}")
+
     try:
         full_path.relative_to(sandbox)
     except ValueError:

@@ -12,10 +12,14 @@
     - API interaction (`generate_content`)
     - Basic mathematical operations (`square_a_number`, `divide_by_sqrt`)
     - CLI argument handling
-
+    - File listing 
+    - File execution (`run_python_file`)
+    - File reading (`read_file`)
+    - File writing (`write_file`)
+  
 ## 2. Getting Started
 ### Prerequisites
-- Python 3.6+
+- Python 3.12+
 - Google GenAI API key (add to `.env` file as `GEMINI_API_KEY`)
 - pip packages: google-genai, dotenv
 
@@ -66,6 +70,9 @@ Note: No tests are currently implemented in the codebase.
 ### Understanding API Integration
 1. Familiarize with Gemini API methods.
 2. Explore response handling and usage statistics.
+3. Rewriting and fixing code to improve readability and functionality.
+4. Code refactoring and optimization.
+
 
 ### Error Handling
 1. Add proper error handling for missing API keys.

@@ -1,10 +1,23 @@
 # call_function.py
+from typing import Any, Dict
 from google.genai import types
 from config import WORKING_DIRECTORY
 from functions.get_files_info import get_files_info, schema_get_files_info
 from functions.get_file_content import get_file_content, schema_get_file_content
 from functions.run_python import run_python_file, schema_run_python_file
 from functions.write_file_content import write_file, schema_write_file
+from functions.utils import normalize_args
+
+def _filter_args(expected_keys: set[str], supplied: dict[str, Any]) -> dict[str, Any]:
+    filtered = {}
+    for k in expected_keys:
+        if k in supplied:
+            filtered[k] = supplied[k]
+    # silently drop any extra keys – they are ignored by the helper
+    return filtered
+
+    # 3️⃣ Build the argument dictionary that the helper actually expects
+
 
 available_functions = types.Tool(
     function_declarations=[
@@ -20,13 +33,28 @@ def call_function(function_call_part, verbose=False):
         print(f"Calling function: {function_call_part.name}({function_call_part.args})")
     else:
         print(f" - Calling function: {function_call_part.name}")
+
+    # ---------------------------------------------------------------- #
+    # 1️⃣ Normalise and inject the sandbox root
+    # ---------------------------------------------------------------- #
     
+    supplied = normalize_args(function_call_part.args)
+    supplied["working_directory"] = WORKING_DIRECTORY  
+
     function_map = {
         "get_files_info": get_files_info,
         "get_file_content": get_file_content,
         "run_python_file": run_python_file,
-        "write_file": write_file,
+        "write_file": write_file
     }
+
+    expected_keys = {
+      "file_path",     # for write_file, get_file_content, …
+      "directory",     # for get_files_info
+      "content",       # for write_file
+      "working_directory",
+    }
+
 
     function_name = function_call_part.name
     if function_name not in function_map:
@@ -39,12 +67,25 @@ def call_function(function_call_part, verbose=False):
                 )
             ],
         )
+    # ----------------------------------------------------------- #
+    # 2️⃣ Prepare the *filtered* arguments for the helper
+    # ----------------------------------------------------------- #
+    expected_keys = {"file_path", "directory", "content", "working_directory"}
+    filtered_args = _filter_args(expected_keys, supplied)
+    
     # setup arguments for function tool call
-    args = function_call_part.args if isinstance(function_call_part.args, dict) else {}
-    args["working_directory"] = WORKING_DIRECTORY
+    # args = function_call_part.args if isinstance(function_call_part.args, dict) else {}
+    # args["working_directory"] = WORKING_DIRECTORY
+
+    # expected_keys = {
+    #         "file_path", "directory", "content", "args"
+    #     }
+    # filtered_args = _filter_args(expected_keys, supplied)
+
+
 
     try:
-         function_result = function_map[function_name](**args)
+         function_result = function_map[function_name](**filtered_args)
     except Exception as exc:
         return types.Content(
             role="tool",
@@ -55,9 +96,9 @@ def call_function(function_call_part, verbose=False):
                 )
             ],
         )
-    #print("Function call result:\n", function_result) # Not Needed for debugging
+    # Return the function result as an assistant message
     return types.Content(
-        role="tool",
+        role="assistant",             
         parts=[
             types.Part.from_function_response(
                 name=function_name,

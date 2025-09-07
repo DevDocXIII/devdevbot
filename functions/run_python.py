@@ -34,7 +34,9 @@ def run_python_file(
         return f'Error: File "{file_path}" is not a Python file.'
 
     # ----- 4. Build the command -----
-    cmd = [sys.executable, full_path] + args
+    cmd = [sys.executable, full_path] + args 
+    
+    # ----- 5. Execute the command -----
 
     try:
         result = subprocess.run(
