@@ -113,8 +113,9 @@ def generate_content(client, messages, user_prompt, verbose):
         result_dict = function_call_result.parts[0].function_response.response or {}
         output_text = result_dict.get("result", "") or result_dict.get("error", "")
         
-        if output_text:
-            print(output_text)
+        
+        #if output_text:
+            #print(output_text)
         if verbose:
             print(f"-> {function_call_result.parts[0].function_response.response}")
     else:
