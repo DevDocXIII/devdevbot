@@ -53,8 +53,14 @@ def call_function(function_call_part, verbose=False):
       "directory",     # for get_files_info
       "content",       # for write_file
       "working_directory",
-    }
 
+    }
+    arg_whitelists = {
+        "get_files_info": {"working_directory", "directory"},
+        "get_file_content": {"working_directory", "file_path"},
+        "run_python_file": {"working_directory", "file_path", "args"},
+        "write_file": {"working_directory", "file_path", "content"},
+    }
 
     function_name = function_call_part.name
     if function_name not in function_map:
@@ -70,54 +76,23 @@ def call_function(function_call_part, verbose=False):
     # ----------------------------------------------------------- #
     # 2️⃣ Prepare the *filtered* arguments for the helper
     # ----------------------------------------------------------- #
-    supplied = normalize_args(function_call_part.args)
-    supplied["working_directory"] = WORKING_DIRECTORY
-    
-    expected_keys = {"file_path", "directory", "content", "working_directory", "args"}
-    filtered_args = _filter_args(expected_keys, supplied)
-    
-    # setup arguments for function tool call
-    # args = function_call_part.args if isinstance(function_call_part.args, dict) else {}
-    # args["working_directory"] = WORKING_DIRECTORY
-
-    # expected_keys = {
-    #         "file_path", "directory", "content", "args"
-    #     }
-    # filtered_args = _filter_args(expected_keys, supplied)
-
-# call_function.py
-# ... keep your filtering, map, etc.
-    try:
-        function_result = function_map[function_name](**filtered_args)
-    except Exception as exc:
-        payload = {"status": "error", "kind": function_name, "details": f"Exception: {exc}"}
+    function_name = function_call_part.name
+    if function_name not in function_map:
+        payload = {"status": "error", "kind": function_name, "details": "Unknown function"}
     else:
-        payload = function_result
+        filtered_args = {k: v for k, v in supplied.items() if k in arg_whitelists[function_name]}
+        try:
+            raw = function_map[function_name](**filtered_args)
+            payload = raw if isinstance(raw, dict) else {
+                "status": "ok",
+                "kind": function_name,
+                "details": str(raw),
+            }
+        except Exception as exc:
+            payload = {"status": "error", "kind": function_name, "details": f"Exception: {exc}"}
 
     return types.Content(
         role="tool",
         parts=[types.Part.from_function_response(name=function_name, response=payload)],
     )
-
-    # try:
-    #      function_result = function_map[function_name](**filtered_args)
-    # except Exception as exc:
-    #     return types.Content(
-    #         role="tool",
-    #         parts=[
-    #             types.Part.from_function_response(
-    #                 name=function_name,
-    #                 response={"error": f"Exception: {exc}"},
-    #             )
-    #         ],
-    #     )
-    # # Return the function result as an assistant message
-    # return types.Content(
-    #     role="tool",             
-    #     parts=[
-    #         types.Part.from_function_response(
-    #             name=function_name,
-    #             response={"result": function_result},
-    #         )
-    #     ],
-    # )
+    

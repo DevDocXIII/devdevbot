@@ -106,8 +106,9 @@ def generate_content(client, messages, user_prompt, verbose) -> bool:
     assistant_msg = types.Content(role="assistant", parts=parts)
     messages.append(assistant_msg)
     _append_assistant_text(parts)
-
+# detect only the first function_call
     func_call = next((getattr(p, "function_call", None) for p in parts if getattr(p, "function_call", None)), None)
+    # func_call = next((getattr(p, "function_call", None) for p in parts if getattr(p, "function_call", None)), None)
 
     if func_call:
         function_call_result = call_function(func_call, verbose=verbose)
