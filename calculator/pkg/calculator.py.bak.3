@@ -1,4 +1,3 @@
-# calculator.py
 class Calculator:
     def __init__(self):
         self.operators = {
@@ -8,16 +7,18 @@ class Calculator:
             "/": lambda a, b: a / b,
         }
         self.precedence = {
-            "+": 3,
+            "+": 1,
             "-": 1,
             "*": 2,
             "/": 2,
         }
 
     def evaluate(self, expression):
+        print(f"Evaluating: {expression}")
         if not expression or expression.isspace():
             return None
         tokens = expression.strip().split()
+        print(f"Tokens: {tokens}")
         return self._evaluate_infix(tokens)
 
     def _evaluate_infix(self, tokens):
@@ -25,6 +26,7 @@ class Calculator:
         operators = []
 
         for token in tokens:
+            print(f"Token: {token}")
             if token in self.operators:
                 while (
                     operators
@@ -45,6 +47,7 @@ class Calculator:
         if len(values) != 1:
             raise ValueError("invalid expression")
 
+        print(f"Result: {values[0]}")
         return values[0]
 
     def _apply_operator(self, operators, values):
@@ -58,3 +61,11 @@ class Calculator:
         b = values.pop()
         a = values.pop()
         values.append(self.operators[operator](a, b))
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1:
+        expression = " ".join(sys.argv[1:])
+        calculator = Calculator()
+        result = calculator.evaluate(expression)
+        print(result)

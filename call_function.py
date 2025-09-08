@@ -70,7 +70,10 @@ def call_function(function_call_part, verbose=False):
     # ----------------------------------------------------------- #
     # 2️⃣ Prepare the *filtered* arguments for the helper
     # ----------------------------------------------------------- #
-    expected_keys = {"file_path", "directory", "content", "working_directory"}
+    supplied = normalize_args(function_call_part.args)
+    supplied["working_directory"] = WORKING_DIRECTORY
+    
+    expected_keys = {"file_path", "directory", "content", "working_directory", "args"}
     filtered_args = _filter_args(expected_keys, supplied)
     
     # setup arguments for function tool call
@@ -82,27 +85,39 @@ def call_function(function_call_part, verbose=False):
     #     }
     # filtered_args = _filter_args(expected_keys, supplied)
 
-
-
+# call_function.py
+# ... keep your filtering, map, etc.
     try:
-         function_result = function_map[function_name](**filtered_args)
+        function_result = function_map[function_name](**filtered_args)
     except Exception as exc:
-        return types.Content(
-            role="tool",
-            parts=[
-                types.Part.from_function_response(
-                    name=function_name,
-                    response={"error": f"Exception: {exc}"},
-                )
-            ],
-        )
-    # Return the function result as an assistant message
+        payload = {"status": "error", "kind": function_name, "details": f"Exception: {exc}"}
+    else:
+        payload = function_result
+
     return types.Content(
-        role="assistant",             
-        parts=[
-            types.Part.from_function_response(
-                name=function_name,
-                response={"result": function_result},
-            )
-        ],
+        role="tool",
+        parts=[types.Part.from_function_response(name=function_name, response=payload)],
     )
+
+    # try:
+    #      function_result = function_map[function_name](**filtered_args)
+    # except Exception as exc:
+    #     return types.Content(
+    #         role="tool",
+    #         parts=[
+    #             types.Part.from_function_response(
+    #                 name=function_name,
+    #                 response={"error": f"Exception: {exc}"},
+    #             )
+    #         ],
+    #     )
+    # # Return the function result as an assistant message
+    # return types.Content(
+    #     role="tool",             
+    #     parts=[
+    #         types.Part.from_function_response(
+    #             name=function_name,
+    #             response={"result": function_result},
+    #         )
+    #     ],
+    # )

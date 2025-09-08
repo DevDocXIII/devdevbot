@@ -1,4 +1,5 @@
-# calculator.py
+import sys
+
 class Calculator:
     def __init__(self):
         self.operators = {
@@ -8,7 +9,7 @@ class Calculator:
             "/": lambda a, b: a / b,
         }
         self.precedence = {
-            "+": 3,
+            "+": 1,
             "-": 1,
             "*": 2,
             "/": 2,
@@ -58,3 +59,12 @@ class Calculator:
         b = values.pop()
         a = values.pop()
         values.append(self.operators[operator](a, b))
+
+
+if __name__ == "__main__":
+    print(f"Arguments: {sys.argv}")
+    if len(sys.argv) > 1:
+        expression = " ".join(sys.argv[1:])
+        calculator = Calculator()
+        result = calculator.evaluate(expression)
+        print(result)

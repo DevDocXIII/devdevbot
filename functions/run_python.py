@@ -44,7 +44,7 @@ def run_python_file(
             cwd=abs_work_dir,
             capture_output=True,
             text=True,
-            timeout=30,
+            timeout=10,
             check=False,  # we will handle non‑zero exit codes ourselves
         )
 
