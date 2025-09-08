@@ -8,6 +8,28 @@ from functions.run_python import run_python_file, schema_run_python_file
 from functions.write_file_content import write_file, schema_write_file
 from functions.utils import normalize_args
 
+function_map = {
+    "get_files_info": get_files_info,
+    "get_file_content": get_file_content,
+    "run_python_file": run_python_file,
+    "write_file": write_file
+}
+
+expected_keys = {
+    "file_path",     # for write_file, get_file_content, …
+    "directory",     # for get_files_info
+    "content",       # for write_file
+    "working_directory",
+
+}
+arg_whitelists = {
+    "get_files_info": {"working_directory", "directory"},
+    "get_file_content": {"working_directory", "file_path"},
+    "run_python_file": {"working_directory", "file_path", "args"},
+    "write_file": {"working_directory", "file_path", "content"},
+}
+
+
 def _filter_args(expected_keys: set[str], supplied: dict[str, Any]) -> dict[str, Any]:
     filtered = {}
     for k in expected_keys:

@@ -4,11 +4,18 @@ import sys
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from call_function import call_function, available_functions
+from call_function import call_function, available_functions, arg_whitelists
 from prompts import SYSTEM_PROMPT
-from config import MAX_ITERATIONS, GEMINI_MODEL, LOG_PATH
+from config import MAX_ITERATIONS, GEMINI_MODEL, LOG_PATH, WORKING_DIRECTORY
 os.makedirs(os.path.dirname(LOG_PATH) or ".", exist_ok=True)
+from functions.cache import ToolCache
+from functions.utils import normalize_args
 
+
+
+tool_cache = ToolCache()
+
+CACHEABLE = {"get_files_info", "get_file_content"}
 # ----------------------------------------------------------------------
 # 1️⃣ Helper utilities
 # ----------------------------------------------------------------------
@@ -43,9 +50,6 @@ def main() -> None:
     user_prompt = " ".join(user_args)
     messages = [types.Content(role="user", parts=[types.Part(text=user_prompt)])]
 
-    #print_verbose("User prompt: {}", verbose, user_prompt)
-
-    # --- Count turns to avoid infinite loops --------------------------------
     turn = 0
     while turn < MAX_ITERATIONS:
         turn += 1
@@ -55,9 +59,6 @@ def main() -> None:
 
     print(f"Finished after {turn} turn(s).")
 
-# ----------------------------------------------------------------------
-# 3️⃣ Verifier function
-# ----------------------------------------------------------------------
 def default_verifier(payload) -> bool:
     if payload.get("kind") == "run":
         art = payload.get("artifacts", {})
@@ -106,38 +107,58 @@ def generate_content(client, messages, user_prompt, verbose) -> bool:
     assistant_msg = types.Content(role="assistant", parts=parts)
     messages.append(assistant_msg)
     _append_assistant_text(parts)
-# detect only the first function_call
-    func_call = next((getattr(p, "function_call", None) for p in parts if getattr(p, "function_call", None)), None)
-    # func_call = next((getattr(p, "function_call", None) for p in parts if getattr(p, "function_call", None)), None)
 
-    if func_call:
-        function_call_result = call_function(func_call, verbose=verbose)
-        parts_out = getattr(function_call_result, "parts", None)
-        if not parts_out:
-            print("Malformed tool response: no parts")
-            return False
-        first_part = parts_out[0]
-        if not hasattr(first_part, "function_response") or first_part.function_response is None:
-            print("Malformed tool response: missing function_response")
-            return False
+    calls = [p.function_call for p in parts if getattr(p, "function_call", None)]
+    if calls:
+        tool_parts = []
+        last_payload = None
 
-        messages.append(function_call_result)
+        for fc in calls:
+            name = fc.name
+            supplied = normalize_args(fc.args)
+            supplied["working_directory"] = WORKING_DIRECTORY
+            filtered = {k: v for k, v in supplied.items() if k in arg_whitelists.get(name, set())}
 
-        payload = getattr(first_part.function_response, "response", {}) or {}
-        status = payload.get("status")
-        kind = payload.get("kind")
+            # try cache for read/list
+            resp_part = None
+            payload = None
+            if name in CACHEABLE:
+                cached_part, cached_payload = tool_cache.get(name, filtered)
+                if cached_part:
+                    resp_part, payload = cached_part, cached_payload
 
-        if verbose:
-            print("TOOL PAYLOAD:", payload)
+            if resp_part is None:
+                # execute tool
+                result_msg = call_function(fc, verbose=verbose)
+                resp_part = next((pt for pt in (getattr(result_msg, "parts", None) or [])
+                                if getattr(pt, "function_response", None)), None)
+                if not resp_part:
+                    print("Malformed tool response")
+                    return False
+                payload = getattr(resp_part.function_response, "response", {}) or {}
+                # store in cache if cacheable
+                if name in CACHEABLE:
+                    tool_cache.set(name, filtered, resp_part, payload)
 
-        if status == "error":
-            return True
-        if status == "noop" and kind == "write":
-            return True
-        if default_verifier(payload):
-            return False
+            tool_parts.append(resp_part)
+            last_payload = payload
+            if verbose:
+                print("TOOL PAYLOAD:", payload)
+
+        # respond with exactly one tool message containing all responses
+        messages.append(types.Content(role="tool", parts=tool_parts))
+
+        # termination logic
+        if last_payload:
+            status = last_payload.get("status")
+            kind = last_payload.get("kind")
+            if status == "error":
+                return True
+            if status == "noop" and kind == "write":
+                return True
+            if default_verifier(last_payload):
+                return False
         return True
-
     # No tool call
     first_text = next((p.text for p in parts if hasattr(p, "text") and p.text), None)
     if first_text:
