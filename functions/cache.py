@@ -1,6 +1,7 @@
 # functions/cache.py
 import json
-from typing import Any, Dict, Tuple,TypedDict
+from typing import Any, Dict, Tuple, TypedDict
+
 class Payload(TypedDict, total=False):
     status: str
     kind: str
@@ -8,7 +9,13 @@ class Payload(TypedDict, total=False):
     artifacts: Dict[str, Any]
 
 def make_key(name: str, args: Dict[str, Any]) -> str:
-    return f"{name}|{json.dumps(args, sort_keys=True, separators=(',', ':'))}"
+    try:
+        args_str = json.dumps(args, sort_keys=True, separators=(',', ':'))
+    except TypeError:
+        # Fallback: convert non-serializable values to strings
+        safe_args = {k: (v if isinstance(v, (str, int, float, bool, list, dict, type(None))) else str(v)) for k, v in args.items()}
+        args_str = json.dumps(safe_args, sort_keys=True, separators=(',', ':'))
+    return f"{name}|{args_str}"
 
 class ToolCache:
     def __init__(self) -> None:
