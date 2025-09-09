@@ -2,21 +2,33 @@
 from google.genai import types
 from config import MAX_CHARS
 import os
+
+# Function to read file content with security checks
 def get_file_content(file_path: str, working_directory: str):
-    import os
+    # Get the absolute path of the working directory
     base = os.path.realpath(working_directory)
+    # Get the absolute path of the target file
     target = os.path.realpath(os.path.join(base, file_path))
+    
+    # Check if the target file is within the allowed working directory
     if os.path.commonpath([base, target]) != base:
         return {"status":"error","kind":"read","details":"outside working dir"}
+    
+    # Verify that the target is actually a file
     if not os.path.isfile(target):
         return {"status":"error","kind":"read","details":f'not a file: "{file_path}"'}
+    
     try:
+        # Read the file content with UTF-8 encoding and replace errors
         with open(target, "r", encoding="utf-8", errors="replace") as f:
             content = f.read()
+        # Return successful response with file content
         return {"status":"ok","kind":"read","artifacts":{"file_path": file_path, "content": content}}
     except Exception as e:
+        # Return error response if reading fails
         return {"status":"error","kind":"read","details": f"read failed: {e}"}
 
+# Schema definition for the function declaration
 schema_get_file_content = types.FunctionDeclaration(
     name="get_file_content",
     description="Read the contents of the file requested in the specified directory constrained to the working directory.",
